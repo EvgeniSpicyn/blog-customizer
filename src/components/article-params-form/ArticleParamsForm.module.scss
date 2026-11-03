@@ -1,4 +1,4 @@
-.container {
+/* .container {
 	position: fixed;
 	left: 0;
 	width: 616px;
@@ -10,17 +10,18 @@
 
 .container_open {
 	transform: translate(0);
-}
+} */
 
 .form {
 	display: flex;
-	flex-shrink: 0;
+
+	// flex-shrink: 0;
 	flex-direction: column;
+	gap: 50px;
 	box-sizing: border-box;
 	width: 616px;
 	height: auto;
 	min-height: 100%;
-  margin: 10px 0;
 	padding: 50px 31px;
 	background-color: #fff;
 	border-right: 1px solid #000;
@@ -32,16 +33,24 @@
 	margin-top: auto;
 }
 
-.field {
+/* .field {
 	margin: 10px 0;
 	padding: 10px;
-}
+} */
 
 .title {
+	padding: 6px 0;
+
 	// color: red;
-	font-size: 33px;
-	font-family: 'DaysOne', sans-serif;
+	font-weight: 800;
+	font-size: 31px;
+	font-family: 'Open-sans', sans-serif;
 	text-transform: uppercase;
 }
 
+.separator {
+	width: 100%;
+	margin: 16px 0;
+	border-top: 1px solid red;
+  }
 

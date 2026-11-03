@@ -1,23 +1,35 @@
 import { defaultArticleState } from '@/constants/articleProps.ts';
 import { clsx } from 'clsx';
-import { useState } from 'react';
-//import Sidebar from '';
+import { useState, useRef, useEffect } from 'react';
 import { ArrowButton } from 'src/ui/arrow-button';
 
 import { ArticleParamsForm } from '@components/article-params-form';
 
 import { Article } from '../article/Article';
 
-//import { Separator } from '@/ui/separator';
 import type { CSSProperties } from 'react';
 
 import styles from './app.module.scss';
 
 export const App = (): React.JSX.Element => {
-  // 1. Создаём состояние: сайдбар закрыт по умолчанию
+  // Создаём состояние: сайдбар закрыт по умолчанию
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (
+        isSidebarOpen &&
+        sidebarRef.current &&
+        !sidebarRef.current.contains(event.target as Node)
+      ) {
+        setIsSidebarOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return (): void => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSidebarOpen]);
 
-  // 2. Функция-обработчик: переключает состояние на противоположное
+  // Функция-обработчик: переключает состояние на противоположное
   const handleToggleSidebar = (): void => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -53,31 +65,21 @@ export const App = (): React.JSX.Element => {
 
   // функция кнопки "Применить"
   const handleApply = (): void => {
-    console.log('Нажата кнопка Применить');
     setAppliedBgColor(draftBgColor);
     setAppliedFontSize(draftFontSize);
     setAppliedFontFamily(draftFontFamily);
     setAppliedColor(draftColor);
     setAppliedContentWidth(draftContentWidth);
-    // закрываем sidebar
     setIsSidebarOpen(false);
   };
 
   // функция кнопки "Сбросить"
   const handleReset = (): void => {
-    console.log(
-      'Нажата кнопка Сбросить',
-      `${defaultArticleState.backgroundColor.value}`
-    );
     setAppliedBgColor(defaultArticleState.backgroundColor.value);
-    //setDraftBgColor(defaultArticleState.backgroundColor.value);
     setAppliedFontSize(defaultArticleState.fontSizeOption.value);
-    //setDraftFontSize(defaultArticleState.fontSizeOption.value);
     setAppliedFontFamily(defaultArticleState.fontFamilyOption.value);
-    //setDraftFontFamily(defaultArticleState.fontFamilyOption.value);
     setAppliedColor(defaultArticleState.fontColor.value);
     setAppliedContentWidth(defaultArticleState.contentWidth.value);
-    //setDraftColor(defaultArticleState.fontColor.value);
     setDraftBgColor(defaultArticleState.backgroundColor.value);
     setDraftFontSize(defaultArticleState.fontSizeOption.value);
     setDraftFontFamily(defaultArticleState.fontFamilyOption.value);
@@ -99,10 +101,11 @@ export const App = (): React.JSX.Element => {
       }
     >
       <ArrowButton isOpen={isSidebarOpen} onClick={handleToggleSidebar} />
-
-      {/* 4. Создаём обёртку для сайдбара */}
-      {/* Пока мы просто показываем/скрываем блок. Анимацию сделаем позже. */}
-      <aside className={clsx(styles.sidebar, isSidebarOpen && styles.open)}>
+      {/* Создаём обёртку для сайдбара*/}
+      <aside
+        ref={sidebarRef}
+        className={clsx(styles.sidebar, isSidebarOpen && styles.open)}
+      >
         <ArticleParamsForm
           //передаем в форму черновики и функции их обновления
           bgColor={draftBgColor}

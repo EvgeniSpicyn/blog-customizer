@@ -10,13 +10,12 @@ import { Select } from '@/ui/select';
 import { Separator } from '@/ui/separator';
 import { Button } from 'src/ui/button';
 
-//import type { ArticleStateType } from '@/constants/articleProps';
-//import { useState } from 'react';
 import type { OptionType } from '@/constants/articleProps';
 
 import styles from './ArticleParamsForm.module.scss';
 
 // Вспомогательная функция: ищет объект опции по значению (value)
+
 const findOption = (options: OptionType[], value: string | number): OptionType => {
   const found = options.find((opt) => opt.value === String(value));
   if (!found) {
@@ -42,10 +41,6 @@ type Props = {
   onReset: () => void;
 };
 
-/* const handleReset = () => {
-  setArticleState(defaultArticleState); // Просто перезаписываем весь объект
-}; */
-
 export const ArticleParamsForm = ({
   bgColor,
   setBgColor,
@@ -60,8 +55,6 @@ export const ArticleParamsForm = ({
   onApply,
   onReset,
 }: Props): React.JSX.Element => {
-  //console.log(fontSize, fontFamily);
-  /* const [articleState, setArticleState] = useState<ArticleStateType>(defaultArticleState); */
   return (
     <>
       <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
@@ -116,7 +109,6 @@ export const ArticleParamsForm = ({
           }}
           title="Ширина текста"
         />
-        <Separator />
         <div className={styles.bottomContainer}>
           <Button title="Сбросить" type="clear" onClick={onReset} />
           <Button title="Применить" type="apply" onClick={onApply} />
