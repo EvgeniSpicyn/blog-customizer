@@ -20,6 +20,7 @@
 	width: 616px;
 	height: auto;
 	min-height: 100%;
+  margin: 10px 0;
 	padding: 50px 31px;
 	background-color: #fff;
 	border-right: 1px solid #000;
@@ -30,3 +31,17 @@
 	justify-content: space-between;
 	margin-top: auto;
 }
+
+.field {
+	margin: 10px 0;
+	padding: 10px;
+}
+
+.title {
+	// color: red;
+	font-size: 33px;
+	font-family: 'DaysOne', sans-serif;
+	text-transform: uppercase;
+}
+
+
