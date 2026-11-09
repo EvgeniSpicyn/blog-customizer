@@ -1,119 +1,143 @@
 import {
   backgroundColors,
   contentWidthArr,
+  defaultArticleState,
   fontColors,
   fontSizeOptions,
   fontFamilyOptions,
 } from '@/constants/articleProps';
+import { ArrowButton } from '@/ui/arrow-button';
 import { RadioGroup } from '@/ui/radio-group';
 import { Select } from '@/ui/select';
 import { Separator } from '@/ui/separator';
+import { clsx } from 'clsx';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from 'src/ui/button';
+import { Text } from 'src/ui/text';
 
-import type { OptionType } from '@/constants/articleProps';
+import type { ArticleStateType, OptionType } from '@/constants/articleProps.ts';
 
 import styles from './ArticleParamsForm.module.scss';
 
-// Вспомогательная функция: ищет объект опции по значению (value)
-
-const findOption = (options: OptionType[], value: string | number): OptionType => {
-  const found = options.find((opt) => opt.value === String(value));
-  if (!found) {
-    // Если не нашли — возвращаем первую опцию как дефолт.
-    // Это гарантирует, что тип всегда будет OptionType, а не undefined.
-    return options[0];
-  }
-  return found;
-};
-
-type Props = {
-  bgColor: string;
-  setBgColor: (val: string) => void;
-  fontSize: string | number;
-  setFontSize: (val: string | number) => void;
-  fontFamily: string;
-  setFontFamily: (val: string) => void;
-  fontColor: string;
-  setFontColor: (val: string) => void;
-  contentWidth: string;
-  setContentWidth: (val: string) => void;
-  onApply: () => void;
-  onReset: () => void;
+type ArticleParamsFormProps = {
+  settings: ArticleStateType;
+  setArticleState: (newSettings: ArticleStateType) => void;
 };
 
 export const ArticleParamsForm = ({
-  bgColor,
-  setBgColor,
-  fontSize,
-  setFontSize,
-  fontFamily,
-  setFontFamily,
-  fontColor,
-  setFontColor,
-  contentWidth,
-  setContentWidth,
-  onApply,
-  onReset,
-}: Props): React.JSX.Element => {
+  settings,
+  setArticleState,
+}: ArticleParamsFormProps): React.JSX.Element => {
+  const [draft, setDraft] = useState<ArticleStateType>(settings);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const sidebarRef = useRef<HTMLDivElement | null>(null);
+
+  // синхронизация черновика, если родитель обновил данные извне
+  useEffect(() => {
+    setDraft(settings);
+  }, [settings]);
+
+  // Клик вне - слушатель вешается только при открытом сайдбаре
+  useEffect(() => {
+    if (!isSidebarOpen) return;
+
+    const handleClickOutside = (event: MouseEvent): void => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        setIsSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return (): void => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSidebarOpen]);
+
+  const handleDraftUpdate =
+    (field: keyof ArticleStateType) =>
+    (value: OptionType): void => {
+      /* setDraft({...draft, [field]: value }); */
+      setDraft((prevState) => ({ ...prevState, [field]: value }));
+    };
+
+  const handleApply = (): void => {
+    setArticleState(draft);
+    setIsSidebarOpen(false);
+  };
+
+  const handleReset = (): void => {
+    setDraft(defaultArticleState);
+    setArticleState(defaultArticleState);
+  };
+
   return (
     <>
-      <form className={styles.form} onSubmit={(e) => e.preventDefault()}>
-        <h2 className={styles.title}>задайте параметры</h2>
-        <Select
-          selected={findOption(fontFamilyOptions, fontFamily)}
-          options={fontFamilyOptions}
-          onChange={(newOption) => {
-            setFontFamily(newOption.value);
-            console.log(`Выбран шрифт ${newOption.value}`);
+      <ArrowButton
+        isOpen={isSidebarOpen}
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+      />
+      <aside
+        ref={sidebarRef}
+        className={clsx(styles.container, {
+          [styles.container_open]: isSidebarOpen,
+        })}
+      >
+        <form
+          className={styles.form}
+          onSubmit={(event) => {
+            event.preventDefault();
+            handleApply();
           }}
-          title="Шрифт"
-        />
-        <RadioGroup
-          name="Размер шрифта"
-          options={fontSizeOptions}
-          selected={findOption(fontSizeOptions, fontSize)}
-          onChange={(newOption) => {
-            //const sizeNumber = Number(newOption.value.replace('px', ''));
-            setFontSize(newOption.value); // Теперь это число: 25, а не "25px"
+          onReset={() => {
+            handleReset();
+          }}
+        >
+          <Text as="h2" size={31} weight={800} uppercase>
+            задайте параметры
+          </Text>
 
-            //setFontSize(newOption.value);
-            console.log(`Выбран размер шрифта ${newOption.value}`);
-          }}
-          title="Размер шрифта"
-        />
-        <Select
-          selected={findOption(fontColors, fontColor)}
-          options={fontColors}
-          onChange={(newOption) => {
-            setFontColor(newOption.value);
-            console.log(`Выбран цвет текста ${newOption.value}`);
-          }}
-          title="Цвет шрифта"
-        />
-        <Separator />
-        <Select
-          selected={findOption(backgroundColors, bgColor)}
-          options={backgroundColors}
-          onChange={(newOption) => {
-            setBgColor(newOption.value);
-            console.log(`Выбран цвет фона ${newOption.value}`);
-          }}
-          title="Цвет фона"
-        />
-        <Select
-          selected={findOption(contentWidthArr, contentWidth)}
-          options={contentWidthArr}
-          onChange={(newOption) => {
-            setContentWidth(newOption.value);
-            console.log(`Выбрана ширина текста ${newOption.value}`);
-          }}
-          title="Ширина текста"
-        />
-        <div className={styles.bottomContainer}>
-          <Button title="Сбросить" type="clear" onClick={onReset} />
-          <Button title="Применить" type="apply" onClick={onApply} />
-        </div>
-      </form>
+          <Select
+            title="Шрифт"
+            selected={draft.fontFamilyOption}
+            options={fontFamilyOptions}
+            onChange={handleDraftUpdate('fontFamilyOption')}
+          />
+
+          <RadioGroup
+            name="Размер шрифта"
+            title="Размер шрифта"
+            options={fontSizeOptions}
+            selected={draft.fontSizeOption}
+            onChange={handleDraftUpdate('fontSizeOption')}
+          />
+
+          <Select
+            title="Цвет шрифта"
+            selected={draft.fontColor}
+            options={fontColors}
+            onChange={handleDraftUpdate('fontColor')}
+          />
+
+          <Separator />
+
+          <Select
+            title="Цвет фона"
+            selected={draft.backgroundColor}
+            options={backgroundColors}
+            onChange={handleDraftUpdate('backgroundColor')}
+          />
+
+          <Select
+            title="Ширина контента"
+            selected={draft.contentWidth}
+            options={contentWidthArr}
+            onChange={handleDraftUpdate('contentWidth')}
+          />
+
+          <div className={styles.bottomContainer}>
+            <Button title="Сбросить" type="clear" htmlType="reset" />
+            <Button title="Применить" type="apply" htmlType="submit" />
+          </div>
+        </form>
+      </aside>
     </>
   );
 };
