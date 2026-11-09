@@ -2,3 +2,19 @@
 	--bg-color: #fff;
 	background-color: var(--bg-color, #fff);
 }
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -100%; /* Скрываем за левым краем экрана */
+  z-index: 1000;
+  width: 614px;
+  height: 100vh;
+  background: #fff;
+  box-shadow: 2px 0 5px rgb(0 0 0 / 10%); /* Лёгкая тень для красоты */
+  transition: left 0.3s ease-in-out; /* Плавная анимация */
+}
+
+.sidebar.open {
+  left: 0; /* Возвращаем на экран */
+}
